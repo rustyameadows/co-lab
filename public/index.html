@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Co-Lab MVP</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Co-Lab MVP</h1>
+      <div class="env-note">Cloudflare Pages + LiveKit (scaffold)</div>
+    </header>
+    <main>
+      <section class="card" id="create-section">
+        <h2>Create Session</h2>
+        <button id="createBtn">Create Session</button>
+        <div id="createResult" class="mono"></div>
+      </section>
+
+      <section class="card" id="join-section">
+        <h2>Join Session</h2>
+        <form id="joinForm">
+          <label>
+            Display Name
+            <input type="text" id="displayName" placeholder="Your name" required />
+          </label>
+          <label>
+            Session ID
+            <input type="text" id="sessionId" placeholder="sess_xxxxxxxx" required />
+          </label>
+          <label>
+            Access Code (H-xxxxxx, C-xxxxxx, V-xxxxxx)
+            <input type="text" id="accessCode" placeholder="H-123456" required />
+          </label>
+          <button type="submit">Join</button>
+        </form>
+        <div id="joinError" class="error"></div>
+      </section>
+
+      <section class="card" id="room-section" hidden>
+        <h2>Room</h2>
+        <div id="roleBadge" class="badge"></div>
+        <div class="video-grid" id="videoGrid">
+          <video id="hostVideo" autoplay playsinline></video>
+        </div>
+        <div class="controls">
+          <button id="leaveBtn">Leave</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- LiveKit client UMD build -->
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.min.js"></script>
+    <script src="/app.js" type="module"></script>
+  </body>
+  </html>
+

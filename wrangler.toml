@@ -1,0 +1,19 @@
+name = "co-lab-mvp"
+compatibility_date = "2024-09-01"
+
+[vars]
+# These should be set in your Cloudflare Pages project or via `wrangler secret put`
+# LIVEKIT_API_KEY = ""
+# LIVEKIT_API_SECRET = ""
+# LIVEKIT_URL = "wss://<your-livekit-host>.livekit.cloud"
+
+[placement]
+mode = "smart"
+
+[observability]
+enabled = true
+
+[pages]
+route_patterns = ["/*"]
+build_output_dir = "public"
+
