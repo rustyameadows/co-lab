@@ -67,6 +67,8 @@ button {
   cursor: pointer;
 }
 button:hover { filter: brightness(1.05); }
+.secondary { background: transparent; border-color: var(--border); color: var(--muted); }
+.secondary:hover { background: rgba(255,255,255,0.04); }
 
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; white-space: pre-wrap; }
 .error { color: #ff7a7a; margin-top: 8px; min-height: 18px; }
@@ -85,4 +87,3 @@ video {
   border: 1px solid var(--border);
 }
 .controls { margin-top: 10px; }
-

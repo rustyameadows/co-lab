@@ -8,6 +8,7 @@ const roomSection = $('#room-section');
 const joinSection = $('#join-section');
 const hostVideo = $('#hostVideo');
 const leaveBtn = $('#leaveBtn');
+const unmuteBtn = $('#unmuteBtn');
 const sessionIdInput = $('#sessionId');
 const nameInput = $('#displayName');
 const codeInput = $('#accessCode');
@@ -86,9 +87,33 @@ async function connectLiveKit({ url, token, role }) {
     const isVideo = track.kind === 'video' || (LK.Track && LK.Track.Kind && track.kind === LK.Track.Kind.Video);
     if (isVideo) {
       track.attach(hostVideo);
-      hostVideo.muted = false;
+      // Start muted to avoid autoplay blocks; offer Unmute button.
+      hostVideo.muted = true;
       safePlay(hostVideo);
+      if (unmuteBtn) unmuteBtn.hidden = false;
     }
+  });
+
+  // Subscribe to newly published tracks from any participant
+  lkRoom.on(LK.RoomEvent.TrackPublished, (publication, participant) => {
+    const kind = publication.kind || (publication.track && publication.track.kind);
+    const isVideo = kind === 'video' || (LK.Track && LK.Track.Kind && kind === LK.Track.Kind.Video);
+    if (isVideo) {
+      try { publication.setSubscribed && publication.setSubscribed(true); } catch {}
+    }
+  });
+
+  // When a participant connects, ensure we subscribe to their already published video
+  lkRoom.on(LK.RoomEvent.ParticipantConnected, (participant) => {
+    try {
+      participant.tracks.forEach((pub) => {
+        const kind = pub.kind || (pub.track && pub.track.kind);
+        const isVideo = kind === 'video' || (LK.Track && LK.Track.Kind && kind === LK.Track.Kind.Video);
+        if (isVideo) {
+          try { pub.setSubscribed && pub.setSubscribed(true); } catch {}
+        }
+      });
+    } catch {}
   });
 
   lkRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => {
@@ -118,6 +143,27 @@ async function connectLiveKit({ url, token, role }) {
       joinError.textContent = 'Failed to access mic/camera.';
     }
   }
+
+  // Ensure we subscribe/attach to any already-published video tracks
+  try {
+    for (const [, participant] of lkRoom.participants) {
+      participant.tracks.forEach((pub) => {
+        const kind = pub.kind || (pub.track && pub.track.kind);
+        const isVideo = kind === 'video' || (LK.Track && LK.Track.Kind && kind === LK.Track.Kind.Video);
+        if (isVideo) {
+          try { pub.setSubscribed && pub.setSubscribed(true); } catch {}
+          if (pub.track) {
+            pub.track.attach(hostVideo);
+            hostVideo.muted = true;
+            safePlay(hostVideo);
+            if (unmuteBtn) unmuteBtn.hidden = false;
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.debug('post-connect attach check skipped', e);
+  }
 }
 
 function safePlay(el) {
@@ -131,4 +177,12 @@ leaveBtn?.addEventListener('click', async () => {
   try { await lkRoom?.disconnect(); } catch {}
   joinSection.hidden = false;
   roomSection.hidden = true;
+});
+
+unmuteBtn?.addEventListener('click', () => {
+  try {
+    hostVideo.muted = false;
+    safePlay(hostVideo);
+    unmuteBtn.hidden = true;
+  } catch {}
 });

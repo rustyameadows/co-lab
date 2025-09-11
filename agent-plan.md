@@ -114,3 +114,5 @@ Autoplay/Preview Notes
 - Subscription behavior
 - Explicitly pass `{ autoSubscribe: true }` to `connect` or `new Room({ autoSubscribe: true })` so late joiners automatically receive existing publications.
 - On `TrackSubscribed`, check kind robustly: accept both `'video'` and `LK.Track.Kind.Video`.
+ - On viewer, start remote video muted and expose an Unmute button to satisfy autoplay.
+ - After connect, iterate participants/publications and ensure video pubs are subscribed and attached to cover race conditions.
