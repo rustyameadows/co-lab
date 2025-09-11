@@ -64,12 +64,13 @@ async function connectLiveKit({ url, token, role }) {
   }
 
   try {
+    const opts = { autoSubscribe: true };
     if (typeof LK.connect === 'function') {
       // Preferred helper if exposed by UMD build
-      lkRoom = await LK.connect(url, token);
+      lkRoom = await LK.connect(url, token, opts);
     } else if (LK.Room && typeof LK.Room === 'function') {
       // Fallback: instance API
-      lkRoom = new LK.Room();
+      lkRoom = new LK.Room(opts);
       await lkRoom.connect(url, token);
     } else {
       joinError.textContent = 'LiveKit global missing connect/Room on UMD build.';
@@ -82,7 +83,8 @@ async function connectLiveKit({ url, token, role }) {
   }
 
   lkRoom.on(LK.RoomEvent.TrackSubscribed, (track) => {
-    if (track.kind === LK.Track.Kind.Video) {
+    const isVideo = track.kind === 'video' || (LK.Track && LK.Track.Kind && track.kind === LK.Track.Kind.Video);
+    if (isVideo) {
       track.attach(hostVideo);
       hostVideo.muted = false;
       safePlay(hostVideo);

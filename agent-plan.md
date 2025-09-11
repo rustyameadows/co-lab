@@ -111,3 +111,6 @@ Autoplay/Preview Notes
 - For local preview, set `video.muted = true` to avoid echo and allow autoplay.
 - On remote subscribe, call `track.attach(video)` then attempt `video.play()`; surface non-fatal errors.
 - Ensure the CDN script tag precedes your app script in `index.html`.
+- Subscription behavior
+- Explicitly pass `{ autoSubscribe: true }` to `connect` or `new Room({ autoSubscribe: true })` so late joiners automatically receive existing publications.
+- On `TrackSubscribed`, check kind robustly: accept both `'video'` and `LK.Track.Kind.Video`.
