@@ -136,8 +136,9 @@ async function connectLiveKit({ url, token, role }) {
 
   roomOn('TrackUnsubscribed', (track) => {
     console.log('[LK] TrackUnsubscribed', { kind: track && track.kind });
-    if (track.kind === LK.Track.Kind.Video) {
-      track.detach(hostVideo);
+    const isVideo = track && (track.kind === 'video' || (LK.Track && LK.Track.Kind && track.kind === LK.Track.Kind.Video));
+    if (isVideo) {
+      try { track.detach(hostVideo); } catch {}
     }
   });
 
@@ -166,10 +167,19 @@ async function connectLiveKit({ url, token, role }) {
 
   // Ensure we subscribe/attach to any already-published video tracks
   try {
-    const partsMap = lkRoom.participants || lkRoom.remoteParticipants;
-    for (const [, participant] of partsMap) {
-      participant.tracks.forEach((pub) => {
-        const kind = pub.kind || (pub.track && pub.track.kind);
+    const parts = (lkRoom.participants && lkRoom.participants.values && Array.from(lkRoom.participants.values()))
+      || (lkRoom.remoteParticipants && lkRoom.remoteParticipants.values && Array.from(lkRoom.remoteParticipants.values()))
+      || (Array.isArray(lkRoom.participants) ? lkRoom.participants : []);
+
+    parts.forEach((participant) => {
+      const pubs = participant?.getTrackPublications?.()
+        || (participant?.tracks && participant.tracks.values && Array.from(participant.tracks.values()))
+        || (Array.isArray(participant?.tracks) ? participant.tracks : [])
+        || (participant?.trackPublications && participant.trackPublications.values && Array.from(participant.trackPublications.values()))
+        || (Array.isArray(participant?.trackPublications) ? participant.trackPublications : []);
+
+      pubs.forEach((pub) => {
+        const kind = pub?.kind || (pub?.track && pub.track.kind);
         const isVideo = kind === 'video' || (LK.Track && LK.Track.Kind && kind === LK.Track.Kind.Video);
         if (isVideo) {
           try { pub.setSubscribed && pub.setSubscribed(true); } catch {}
@@ -182,7 +192,7 @@ async function connectLiveKit({ url, token, role }) {
           }
         }
       });
-    }
+    });
   } catch (e) {
     console.debug('post-connect attach check skipped', e);
   }
@@ -214,11 +224,20 @@ window.__lk = {
   stats() {
     const room = window.lkRoom;
     if (!room) return 'no room';
-    const parts = room.participants || room.remoteParticipants;
-    const arr = [];
-    for (const [, p] of parts) {
-      arr.push({ id: p.identity, tracks: Array.from(p.tracks.values()).map((pub) => ({ kind: pub.kind, subscribed: pub.isSubscribed, hasTrack: !!pub.track })) });
-    }
+    const parts = (room.participants && room.participants.values && Array.from(room.participants.values()))
+      || (room.remoteParticipants && room.remoteParticipants.values && Array.from(room.remoteParticipants.values()))
+      || (Array.isArray(room.participants) ? room.participants : []);
+    const arr = parts.map((p) => {
+      const pubs = p?.getTrackPublications?.()
+        || (p?.tracks && p.tracks.values && Array.from(p.tracks.values()))
+        || (Array.isArray(p?.tracks) ? p.tracks : [])
+        || (p?.trackPublications && p.trackPublications.values && Array.from(p.trackPublications.values()))
+        || (Array.isArray(p?.trackPublications) ? p.trackPublications : []);
+      return {
+        id: p.identity,
+        tracks: pubs.map((pub) => ({ kind: pub.kind || (pub.track && pub.track.kind), subscribed: pub.isSubscribed, hasTrack: !!pub.track })),
+      };
+    });
     return { state: room.connectionState || room.state, remotes: arr };
   },
 };
