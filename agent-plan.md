@@ -81,3 +81,19 @@ Security/Limitations (current)
 - Codes are not persisted/validated beyond prefix convention (scaffold only)
 - Tokens are valid for 1 hour; no refresh endpoint yet
 - No rate limits, no CSRF, no auth cookie/session
+
+Cloudflare Pages (GitHub-connected) Settings
+- Build command: leave empty (no build step)
+- Output directory: `public`
+- Framework preset: None
+- Functions: auto-detected from `functions/`
+- Root directory: repo root (do not set a subdirectory)
+- Compatibility date: 2024-09-01 (Project → Functions)
+- Env vars (Preview + Production): `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `LIVEKIT_URL`
+- Deploy flow: connect repo → set settings above → deploy
+
+CDN Notes (LiveKit client)
+- Use the UMD build path: `https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js`
+- Pin at least the major version to avoid breaking changes (`@2`), or pin a specific version (e.g., `@2.3.x`).
+- Verify Network response has `content-type: application/javascript`; with `X-Content-Type-Options: nosniff`, mismatched MIME types will be blocked.
+- If you see a MIME error or 404, the path is wrong or cached. Fix the URL and hard-refresh (Shift+Reload).
