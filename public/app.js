@@ -84,6 +84,8 @@ async function connectLiveKit({ url, token, role }) {
   lkRoom.on(LK.RoomEvent.TrackSubscribed, (track) => {
     if (track.kind === LK.Track.Kind.Video) {
       track.attach(hostVideo);
+      hostVideo.muted = false;
+      safePlay(hostVideo);
     }
   });
 
@@ -99,6 +101,13 @@ async function connectLiveKit({ url, token, role }) {
   if (role === 'host') {
     try {
       const tracks = await LK.createLocalTracks({ audio: true, video: true });
+      // Show local preview for host
+      const localVideo = tracks.find((t) => t.kind === LK.Track.Kind.Video);
+      if (localVideo) {
+        localVideo.attach(hostVideo);
+        hostVideo.muted = true; // avoid echo on local preview
+        safePlay(hostVideo);
+      }
       for (const t of tracks) {
         await lkRoom.localParticipant.publishTrack(t);
       }
@@ -106,6 +115,13 @@ async function connectLiveKit({ url, token, role }) {
       console.error('Local track error', err);
       joinError.textContent = 'Failed to access mic/camera.';
     }
+  }
+}
+
+function safePlay(el) {
+  const p = el && typeof el.play === 'function' ? el.play() : null;
+  if (p && typeof p.catch === 'function') {
+    p.catch((e) => console.debug('autoplay prevented', e));
   }
 }
 

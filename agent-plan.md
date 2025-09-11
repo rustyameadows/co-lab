@@ -105,4 +105,9 @@ UMD Usage (client code)
   - `const LK = window.LivekitClient || window.LiveKit; if (!LK) { show error; return; }`
 - Reference classes and helpers via `LK.*` (e.g., `LK.RoomEvent`, `LK.Track`, `LK.createLocalTracks`).
 - Fallback if the helper is missing: `const room = new LK.Room(); await room.connect(url, token);`
+
+Autoplay/Preview Notes
+- Browsers may block autoplay with audio; prefer explicit `element.play()` after user gesture (join click).
+- For local preview, set `video.muted = true` to avoid echo and allow autoplay.
+- On remote subscribe, call `track.attach(video)` then attempt `video.play()`; surface non-fatal errors.
 - Ensure the CDN script tag precedes your app script in `index.html`.
