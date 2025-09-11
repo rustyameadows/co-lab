@@ -56,30 +56,44 @@ joinForm?.addEventListener('submit', async (e) => {
 });
 
 async function connectLiveKit({ url, token, role }) {
-  const { Room, RoomEvent, createLocalTracks, Track } = window.LiveKit;
-  lkRoom = new Room();
+  const LK = window.LiveKit;
+  if (!LK || typeof LK.connect !== 'function') {
+    joinError.textContent = 'LiveKit failed to load. Check CDN URL/network.';
+    return;
+  }
 
-  lkRoom.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-    // Attach the host's video track
-    if (track.kind === Track.Kind.Video) {
+  try {
+    lkRoom = await LK.connect(url, token);
+  } catch (err) {
+    console.error('LiveKit connect error', err);
+    joinError.textContent = 'Failed to connect to LiveKit.';
+    return;
+  }
+
+  lkRoom.on(LK.RoomEvent.TrackSubscribed, (track) => {
+    if (track.kind === LK.Track.Kind.Video) {
       track.attach(hostVideo);
     }
   });
 
-  lkRoom.on(RoomEvent.TrackUnsubscribed, (track) => {
-    if (track.kind === Track.Kind.Video) {
+  lkRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => {
+    if (track.kind === LK.Track.Kind.Video) {
       track.detach(hostVideo);
     }
   });
 
-  await lkRoom.connect(url, token);
   joinSection.hidden = true;
   roomSection.hidden = false;
 
   if (role === 'host') {
-    const tracks = await createLocalTracks({ audio: true, video: true });
-    for (const t of tracks) {
-      await lkRoom.localParticipant.publishTrack(t);
+    try {
+      const tracks = await LK.createLocalTracks({ audio: true, video: true });
+      for (const t of tracks) {
+        await lkRoom.localParticipant.publishTrack(t);
+      }
+    } catch (err) {
+      console.error('Local track error', err);
+      joinError.textContent = 'Failed to access mic/camera.';
     }
   }
 }
@@ -89,4 +103,3 @@ leaveBtn?.addEventListener('click', async () => {
   joinSection.hidden = false;
   roomSection.hidden = true;
 });
-

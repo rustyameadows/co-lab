@@ -97,3 +97,10 @@ CDN Notes (LiveKit client)
 - Pin at least the major version to avoid breaking changes (`@2`), or pin a specific version (e.g., `@2.3.x`).
 - Verify Network response has `content-type: application/javascript`; with `X-Content-Type-Options: nosniff`, mismatched MIME types will be blocked.
 - If you see a MIME error or 404, the path is wrong or cached. Fix the URL and hard-refresh (Shift+Reload).
+
+UMD Usage (client code)
+- Prefer `window.LiveKit.connect(url, token)` which returns a connected `Room`.
+- Avoid destructuring from `window.LiveKit` at load; guard first:
+  - `const LK = window.LiveKit; if (!LK) { show error; return; }`
+- Reference classes and helpers via `LK.*` (e.g., `LK.RoomEvent`, `LK.Track`, `LK.createLocalTracks`).
+- Ensure the CDN script tag precedes your app script in `index.html`.
