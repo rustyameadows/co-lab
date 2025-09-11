@@ -104,4 +104,5 @@ UMD Usage (client code)
 - Avoid destructuring from the global at load; guard first:
   - `const LK = window.LivekitClient || window.LiveKit; if (!LK) { show error; return; }`
 - Reference classes and helpers via `LK.*` (e.g., `LK.RoomEvent`, `LK.Track`, `LK.createLocalTracks`).
+- Fallback if the helper is missing: `const room = new LK.Room(); await room.connect(url, token);`
 - Ensure the CDN script tag precedes your app script in `index.html`.

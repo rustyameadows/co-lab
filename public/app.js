@@ -56,15 +56,25 @@ joinForm?.addEventListener('submit', async (e) => {
 });
 
 async function connectLiveKit({ url, token, role }) {
-  // LiveKit UMD exports global as `LivekitClient` (preferred) or sometimes `LiveKit`.
+  // LiveKit UMD global: `LivekitClient` (preferred) or `LiveKit`.
   const LK = window.LivekitClient || window.LiveKit;
-  if (!LK || typeof LK.connect !== 'function') {
+  if (!LK) {
     joinError.textContent = 'LiveKit failed to load. Check CDN URL/network.';
     return;
   }
 
   try {
-    lkRoom = await LK.connect(url, token);
+    if (typeof LK.connect === 'function') {
+      // Preferred helper if exposed by UMD build
+      lkRoom = await LK.connect(url, token);
+    } else if (LK.Room && typeof LK.Room === 'function') {
+      // Fallback: instance API
+      lkRoom = new LK.Room();
+      await lkRoom.connect(url, token);
+    } else {
+      joinError.textContent = 'LiveKit global missing connect/Room on UMD build.';
+      return;
+    }
   } catch (err) {
     console.error('LiveKit connect error', err);
     joinError.textContent = 'Failed to connect to LiveKit.';
