@@ -5,6 +5,9 @@
 - Create a `.dev.vars` file at the repo root (same folder as `wrangler.toml`). You can copy `/.dev.vars.example`:
   - `cp .dev.vars.example .dev.vars` and fill in your values.
 
+- Easiest: use the helper script (loads `.dev.vars` automatically):
+  - `./start-local-dev` (add `--port 8788` to change the port)
+
 - Start Pages dev with env vars loaded:
   - `wrangler pages dev public --compatibility-date=2024-09-01 --env-file .dev.vars`
 
