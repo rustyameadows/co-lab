@@ -77,6 +77,13 @@ async function connectLiveKit({ url, token, role }) {
       joinError.textContent = 'LiveKit global missing connect/Room on UMD build.';
       return;
     }
+    // expose for debugging
+    window.lkRoom = lkRoom;
+    window.LK = LK;
+    console.log('[LK] connected', {
+      connectionState: lkRoom.connectionState || lkRoom.state,
+      participantsSize: lkRoom.participants ? lkRoom.participants.size : (lkRoom.remoteParticipants ? lkRoom.remoteParticipants.size : 'n/a'),
+    });
   } catch (err) {
     console.error('LiveKit connect error', err);
     joinError.textContent = 'Failed to connect to LiveKit.';
@@ -154,7 +161,8 @@ async function connectLiveKit({ url, token, role }) {
 
   // Ensure we subscribe/attach to any already-published video tracks
   try {
-    for (const [, participant] of lkRoom.participants) {
+    const partsMap = lkRoom.participants || lkRoom.remoteParticipants;
+    for (const [, participant] of partsMap) {
       participant.tracks.forEach((pub) => {
         const kind = pub.kind || (pub.track && pub.track.kind);
         const isVideo = kind === 'video' || (LK.Track && LK.Track.Kind && kind === LK.Track.Kind.Video);

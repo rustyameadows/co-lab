@@ -72,6 +72,7 @@ Manual Smoke Test
   2) Join as host: enter name, sessionId, host code. Allow camera/mic.
   3) Open another browser window → join with same sessionId and a viewer code.
   4) Viewer should see host video; host badge shown.
+  5) Debugging: open Console and check `typeof window.lkRoom` is 'object'; inspect `window.lkRoom.participants.size` to confirm remote participant is present.
 
 Assumptions
 - LiveKit Cloud project exists; URL/API key/secret are valid
