@@ -56,7 +56,8 @@ joinForm?.addEventListener('submit', async (e) => {
 });
 
 async function connectLiveKit({ url, token, role }) {
-  const LK = window.LiveKit;
+  // LiveKit UMD exports global as `LivekitClient` (preferred) or sometimes `LiveKit`.
+  const LK = window.LivekitClient || window.LiveKit;
   if (!LK || typeof LK.connect !== 'function') {
     joinError.textContent = 'LiveKit failed to load. Check CDN URL/network.';
     return;
