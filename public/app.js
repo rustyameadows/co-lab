@@ -83,7 +83,15 @@ async function connectLiveKit({ url, token, role }) {
     return;
   }
 
-  lkRoom.on(LK.RoomEvent.TrackSubscribed, (track) => {
+  const roomOn = (ev, handler) => {
+    try {
+      if (LK.RoomEvent && LK.RoomEvent[ev]) lkRoom.on(LK.RoomEvent[ev], handler);
+    } catch {}
+    try { lkRoom.on(ev, handler); } catch {}
+    try { lkRoom.on(ev.charAt(0).toLowerCase() + ev.slice(1), handler); } catch {}
+  };
+
+  roomOn('TrackSubscribed', (track) => {
     const isVideo = track.kind === 'video' || (LK.Track && LK.Track.Kind && track.kind === LK.Track.Kind.Video);
     if (isVideo) {
       track.attach(hostVideo);
@@ -95,7 +103,7 @@ async function connectLiveKit({ url, token, role }) {
   });
 
   // Subscribe to newly published tracks from any participant
-  lkRoom.on(LK.RoomEvent.TrackPublished, (publication, participant) => {
+  roomOn('TrackPublished', (publication, participant) => {
     const kind = publication.kind || (publication.track && publication.track.kind);
     const isVideo = kind === 'video' || (LK.Track && LK.Track.Kind && kind === LK.Track.Kind.Video);
     if (isVideo) {
@@ -104,7 +112,7 @@ async function connectLiveKit({ url, token, role }) {
   });
 
   // When a participant connects, ensure we subscribe to their already published video
-  lkRoom.on(LK.RoomEvent.ParticipantConnected, (participant) => {
+  roomOn('ParticipantConnected', (participant) => {
     try {
       participant.tracks.forEach((pub) => {
         const kind = pub.kind || (pub.track && pub.track.kind);
@@ -116,7 +124,7 @@ async function connectLiveKit({ url, token, role }) {
     } catch {}
   });
 
-  lkRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => {
+  roomOn('TrackUnsubscribed', (track) => {
     if (track.kind === LK.Track.Kind.Video) {
       track.detach(hostVideo);
     }
