@@ -1,0 +1,7 @@
+# Local dev variables for wrangler pages dev
+# Copy to .dev.vars and fill in real values. Do NOT commit .dev.vars.
+
+LIVEKIT_API_KEY="lk_key_XXXXXXXXXXXXXXXX"
+LIVEKIT_API_SECRET="lk_secret_YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+LIVEKIT_URL="wss://<your-tenant>.livekit.cloud"
+

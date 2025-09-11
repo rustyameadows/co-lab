@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+if [ ! -f "$ROOT_DIR/.dev.vars" ]; then
+  echo "⚠️  Missing .dev.vars at repo root. Copy .dev.vars.example and fill in values." >&2
+  exit 1
+fi
+
+echo "▶️  Starting Cloudflare Pages local dev with env from .dev.vars"
+echo "    URL will be printed below (default http://127.0.0.1:8788)"
+
+exec wrangler pages dev public --compatibility-date=2024-09-01 --env-file "$ROOT_DIR/.dev.vars" "$@"
+

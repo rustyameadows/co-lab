@@ -1,0 +1,10 @@
+{
+  "name": "co-lab-mvp",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "wrangler pages dev public --compatibility-date=2024-09-01 --env-file .dev.vars",
+    "start-local": "npm run dev"
+  }
+}
+
